@@ -1,7 +1,7 @@
 NIPS 2018 Adversarial Vision Challenge
 ======================================
 
-Code to reproduce the attacks and defenses for the entries "JeromeR" in the `NIPS 2018 Adversarial Vision Challenge`_ 
+Code to reproduce the attacks and defenses for the entries "JeromeR" in the `NIPS 2018 Adversarial Vision Challenge`_ (1st place on Untargeted attacks, 3rd place on Robust models and Targeted attacks)
 
 Team name: LIVIA - ETS Montreal
 
