@@ -36,7 +36,7 @@ def attack(model: Callable,
         The true label (if targeted=True) or target label (if targeted=False)
     targeted : bool
         Wheter to run untargeted or a targeted attack
-    device: torch.device
+    device : torch.device
         Which device to use for the attacks
 
     Returns
@@ -133,7 +133,7 @@ def bound_search(model, image, label, delta, alpha=1, iters=9, targeted=False):
             else:
                 return lower, upper, True
 
-    return np.zeros_like(delta), np.maximum(1 - image, image), False
+    return np.zeros_like(delta), np.round(delta / delta.max() * 255), False
 
 
 def binary_search(model, image, label, lower, upper, steps=10, targeted=False):
