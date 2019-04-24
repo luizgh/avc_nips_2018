@@ -30,39 +30,32 @@ For more information on the DDN attack, refer to the paper_, and implementation_
 .. _Jérôme Rony: http://github.com/jeromerony/
 .. _paper: https://arxiv.org/abs/1811.09600
 .. _implementation: https://github.com/jeromerony/fast_adversarial
-.. _TinyImagenet: https://tiny-imagenet.herokuapp.com/
+.. _TinyImagenet: https://drive.google.com/open?id=1pvefHKnFqtyN8vfg5ScF6jwMCP8PNWSj
 .. _resnet18_clean: https://storage.googleapis.com/luizgh-datasets/avc_models/resnet18_clean.pt
 .. _resnext50_ddn: https://storage.googleapis.com/luizgh-datasets/avc_models/resnext50_32x4d_ddn.pt
+.. _resnext50_32x4d: https://drive.google.com/open?id=1DAsFkKHFhMkAppp-L4nNN_QEcJkEwYq8
 
 Installation
 ============
 
 Clone this repository and install the dependencies by running ``pip install -r requirements.txt``
 
-Download the TinyImagenet_ dataset:
+Download the TinyImagenet_ dataset and extract it:
 
 .. code-block:: bash
 
-    wget https://storage.googleapis.com/luizgh-datasets/avc_models/tiny-imagenet-pytorch.tar.gz
     tar xvf tiny-imagenet-pytorch.tar.gz -C data
 
-Optional: download trained models: resnext50_ddn_ (our robust model), resnet18_clean_ (not adversarially trained):
-
-.. code-block:: bash
-
-    wget https://storage.googleapis.com/luizgh-datasets/avc_models/resnet18_clean.pt
-    wget https://storage.googleapis.com/luizgh-datasets/avc_models/resnext50_32x4d_ddn.pt
-    wget https://storage.googleapis.com/luizgh-datasets/avc_models/resnext50_32x4d_imagenet.pth
-
+Optional: download trained models: resnext50_ddn_ (our robust model), resnet18_clean_ (not adversarially trained).
 
 Training a model
 ================
 
-Adversarially training a model (using the DDN attack):
+Adversarially train a model (using the DDN attack) starting from an imagenet-pretrained resnext50_32x4d_ :
 
 .. code-block:: bash
 
-    python train_tiny_imagenet_ddn.py data --sf tiny_ddn --adv --max-norm 2.5 --arch resnext50_32x4d --pretrained
+    python train_tiny_imagenet_ddn.py data --sf tiny_ddn --adv --max-norm 1 --arch resnext50_32x4d --pretrained
 
 
 For monitoring training, you can start a visdom server, and then add the argument ``--visdom-port <port>`` to the
