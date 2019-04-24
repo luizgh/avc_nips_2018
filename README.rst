@@ -31,8 +31,8 @@ For more information on the DDN attack, refer to the paper_, and implementation_
 .. _paper: https://arxiv.org/abs/1811.09600
 .. _implementation: https://github.com/jeromerony/fast_adversarial
 .. _TinyImagenet: https://drive.google.com/open?id=1pvefHKnFqtyN8vfg5ScF6jwMCP8PNWSj
-.. _resnet18_clean: https://storage.googleapis.com/luizgh-datasets/avc_models/resnet18_clean.pt
-.. _resnext50_ddn: https://storage.googleapis.com/luizgh-datasets/avc_models/resnext50_32x4d_ddn.pt
+.. _resnet18_clean: https://drive.google.com/open?id=1UCRo_4gQThr58v1qPGVh5YuFlxIOSsPz
+.. _resnext50_ddn: https://drive.google.com/open?id=1J6YBHEtTRF1Bq1jpjSJzpk-ifGStfua9
 .. _resnext50_32x4d: https://drive.google.com/open?id=1DAsFkKHFhMkAppp-L4nNN_QEcJkEwYq8
 
 Installation
