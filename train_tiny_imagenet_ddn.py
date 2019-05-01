@@ -77,7 +77,7 @@ def main():
     model.to(device)
 
     if torch.cuda.device_count() > 1:
-        model = torch.nn.DataParallel(model, device_ids=[i for i in range(torch.cuda.device_count())])
+        model = torch.nn.DataParallel(model)
 
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss()
@@ -134,7 +134,7 @@ def main():
         print('Learning rate for epoch {}: {:.2e}'.format(epoch, optimizer.param_groups[0]['lr']))
 
         # train for one epoch
-        train(train_loader, model, criterion, optimizer, attack, device, epoch, callback)
+        train(train_loader, model, m, criterion, optimizer, attack, device, epoch, callback)
 
         # evaluate on validation set
         prec1 = validate(val_loader, model, criterion, device, epoch + 1, callback)
@@ -154,7 +154,7 @@ def main():
         )
 
 
-def train(train_loader, model, criterion, optimizer, attack, device, epoch, callback=None):
+def train(train_loader, model, m, criterion, optimizer, attack, device, epoch, callback=None):
     model.train()
     cudnn.benchmark = True
     length = len(train_loader)
@@ -174,7 +174,7 @@ def train(train_loader, model, criterion, optimizer, attack, device, epoch, call
 
         if args.adv and epoch >= args.start_adv_epoch:
             model.eval()
-            utils.requires_grad_(model.model, False)
+            utils.requires_grad_(m, False)
 
             clean_logits = model(data)
             loss = criterion(clean_logits, labels)
@@ -186,7 +186,7 @@ def train(train_loader, model, criterion, optimizer, attack, device, epoch, call
                 adv = torch.renorm(adv - data, p=2, dim=0, maxnorm=args.max_norm) + data
             l2_adv.append(mean_norm.item())
 
-            utils.requires_grad_(model.model, True)
+            utils.requires_grad_(m, True)
             model.train()
 
             adv_logits = model(adv.detach())
