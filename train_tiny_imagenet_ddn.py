@@ -208,9 +208,9 @@ def train(train_loader, model, m, criterion, optimizer, attack, device, epoch, c
 
         # measure accuracy and record loss
         prec1, prec5 = utils.accuracy(clean_logits, labels, topk=(1, 5))
-        losses.append(min(loss.item(), 5.3))
-        top1.append(prec1[0])
-        top5.append(prec5[0])
+        losses.append(loss.item())
+        top1.append(prec1)
+        top5.append(prec5)
 
         # measure elapsed time
         batch_time.append(time.time() - end)
@@ -221,14 +221,14 @@ def train(train_loader, model, m, criterion, optimizer, attack, device, epoch, c
             if args.adv and epoch >= args.start_adv_epoch:
                 print('Epoch: [{0:>2d}][{1:>3d}/{2:>3d}] Time {batch_time.last_avg:.3f}'
                       '\tLoss {loss.last_avg:.4f}\tAdv {loss_adv.last_avg:.4f}'
-                      '\tPrec@1 {top1.last_avg:.3f}\tPrec@5 {top5.last_avg:.3f}'.format(epoch, i + 1, len(train_loader),
+                      '\tPrec@1 {top1.last_avg:.3%}\tPrec@5 {top5.last_avg:.3%}'.format(epoch, i + 1, len(train_loader),
                                                                                         batch_time=batch_time,
                                                                                         loss=losses,
                                                                                         loss_adv=losses_adv,
                                                                                         top1=top1, top5=top5))
             else:
                 print('Epoch: [{0:>2d}][{1:>3d}/{2:>3d}] Time {batch_time.last_avg:.3f}\tLoss {loss.last_avg:.4f}'
-                      '\tPrec@1 {top1.last_avg:.3f}\tPrec@5 {top5.last_avg:.3f}'.format(epoch, i + 1, len(train_loader),
+                      '\tPrec@1 {top1.last_avg:.3%}\tPrec@5 {top5.last_avg:.3%}'.format(epoch, i + 1, len(train_loader),
                                                                                         batch_time=batch_time,
                                                                                         loss=losses,
                                                                                         top1=top1, top5=top5))
@@ -238,13 +238,13 @@ def train(train_loader, model, m, criterion, optimizer, attack, device, epoch, c
                     callback.scalars(['train_loss', 'adv_loss'], i / length + epoch,
                                      [losses.last_avg, losses_adv.last_avg])
                     callback.scalars(['train_prec@1', 'train_prec@5', 'adv_acc'], i / length + epoch,
-                                     [top1.last_avg, top5.last_avg, adv_acc.last_avg * 100])
+                                     [top1.last_avg * 100, top5.last_avg * 100, adv_acc.last_avg * 100])
                     callback.scalar('adv_l2', i / length + epoch, l2_adv.last_avg)
 
                 else:
                     callback.scalar('train_loss', i / length + epoch, losses.last_avg)
                     callback.scalars(['train_prec@1', 'train_prec@5'], i / length + epoch,
-                                     [top1.last_avg, top5.last_avg])
+                                     [top1.last_avg * 100, top5.last_avg * 100])
 
 
 def validate(val_loader, model, criterion, device, epoch, callback=None):
@@ -252,10 +252,8 @@ def validate(val_loader, model, criterion, device, epoch, callback=None):
     cudnn.benchmark = False
 
     batch_time = utils.AverageMeter()
-    losses = utils.AverageMeter()
-    top1 = utils.AverageMeter()
-    top5 = utils.AverageMeter()
-
+    all_logits = []
+    all_labels = []
     with torch.no_grad():
         end = time.time()
         for i, (data, labels) in enumerate(val_loader):
@@ -264,24 +262,25 @@ def validate(val_loader, model, criterion, device, epoch, callback=None):
 
             # compute output
             output = model(data)
-            loss = criterion(output, labels)
+            all_logits.append(output)
+            all_labels.append(labels)
 
             batch_time.append(time.time() - end)
             end = time.time()
 
-            # measure accuracy and record loss for clean samples
-            prec1, prec5 = utils.accuracy(output, labels, topk=(1, 5))
-            losses.append(loss.item())
-            top1.append(prec1[0])
-            top5.append(prec5[0])
+        all_logits = torch.cat(all_logits, 0)
+        all_labels = torch.cat(all_labels, 0)
+        # measure accuracy and record loss for clean samples
+        loss = criterion(output, labels).item()
+        prec1, prec5 = utils.accuracy(all_logits, all_labels, topk=(1, 5))
 
-    print('Val | Time {:.3f}\tLoss {:.4f} | Clean: Prec@1 {:.3f}\tPrec@5 {:.3f}'.format(batch_time.avg, losses.avg,
-                                                                                        top1.avg, top5.avg))
+    print('Val | Time {:.3f}\tLoss {:.4f} | Clean: Prec@1 {:.3%}\tPrec@5 {:.3%}'.format(batch_time.avg, loss,
+                                                                                        prec1, prec5))
     if callback:
-        callback.scalar('val_loss', epoch, losses.avg)
-        callback.scalars(['val_prec@1', 'val_prec@5'], epoch, [top1.avg, top5.avg])
+        callback.scalar('val_loss', epoch, loss)
+        callback.scalars(['val_prec@1', 'val_prec@5'], epoch, [prec1, prec5])
 
-    return top1.avg
+    return prec1
 
 
 if __name__ == '__main__':
